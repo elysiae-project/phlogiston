@@ -327,6 +327,9 @@ apply_all_in_dir() {
     echo "WINE: -HOTFIX- Gate the HSR first-connect refusal workaround"
     apply_patch "../patches/wine-hotfixes/pending/ws2_32-hsr-first-connect-refused.patch"
 
+    echo "WINE: -HOTFIX- Stub HSR's first catalog lookup sequence"
+    apply_patch "../patches/wine-hotfixes/pending/wintrust-hsr-catalog-stubs.patch"
+
     echo "WINE: -HOTFIX- Fall back when GnuTLS lacks NO_SHUFFLE_EXTENSIONS"
     apply_patch "../patches/wine-hotfixes/pending/secur32-fallback-without-no-shuffle-extensions.patch"
 

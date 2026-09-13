@@ -1,14 +1,15 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Phlogiston contributors <noreply@example.com>
 Date: Sat, 12 Sep 2026 00:00:00 +0000
-Subject: [PATCH] ws2_32: Gate one-shot HSR connect refusal
+Subject: [PATCH] ws2_32: Refuse HSR's first stream connection
 
-Keep the compatibility behavior disabled by default and restrict it to a
-validated IPv4 or IPv6 stream socket. Atomically reject exactly one eligible
-connect call per process when explicitly requested by the launch profile.
+Enable the compatibility behavior automatically for StarRail.exe, with
+environment variables to force or disable it. Restrict it to a validated IPv4
+or IPv6 stream socket and atomically reject exactly one eligible connect call
+per process.
 ---
- dlls/ws2_32/socket.c | 34 ++++++++++++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
+ dlls/ws2_32/socket.c | 50 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
 
 diff --git a/dlls/ws2_32/socket.c b/dlls/ws2_32/socket.c
 index f3814a5e7c13..000000000000 100644
@@ -23,16 +24,35 @@ index f3814a5e7c13..000000000000 100644
  #define u64_from_user_ptr(ptr) ((ULONGLONG)(uintptr_t)(ptr))
  
  static const WSAPROTOCOL_INFOW supported_protocols[] =
-@@ -1324,6 +1326,35 @@ int WINAPI closesocket( SOCKET s )
+@@ -1324,6 +1326,51 @@ int WINAPI closesocket( SOCKET s )
  }
  
  
++static BOOL hsr_connect_workaround_enabled(void)
++{
++    const WCHAR *name, *p;
++    char value[2];
++
++    if (GetEnvironmentVariableA( "WINE_DISABLE_DISCONNECT", value, sizeof(value) ) == 1 &&
++        value[0] == '1')
++        return FALSE;
++    if (GetEnvironmentVariableA( "WINE_ENABLE_DISCONNECT", value, sizeof(value) ) == 1 &&
++        value[0] == '1')
++        return TRUE;
++
++    name = NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer;
++    if ((p = wcsrchr( name, '/' ))) name = p + 1;
++    if ((p = wcsrchr( name, '\\' ))) name = p + 1;
++    return !wcsicmp( name, L"StarRail.exe" );
++}
++
++
 +static BOOL hsr_refuse_connect( SOCKET s, const struct sockaddr *addr, int len )
 +{
 +    WSAPROTOCOL_INFOW info;
-+    char enabled[2];
 +    int size;
 +
++    if (!hsr_connect_workaround_enabled()) return FALSE;
 +    if (addr->sa_family == AF_INET)
 +    {
 +        if (len < sizeof(struct sockaddr_in)) return FALSE;
@@ -45,12 +65,9 @@ index f3814a5e7c13..000000000000 100644
 +
 +    if (!ws_protocol_info( s, TRUE, &info, &size ) || info.iSocketType != SOCK_STREAM)
 +        return FALSE;
-+    if (GetEnvironmentVariableA( "WINE_HSR_FIRST_CONNECT_REFUSED", enabled, sizeof(enabled) ) != 1 ||
-+        enabled[0] != '1')
-+        return FALSE;
 +    if (InterlockedCompareExchange( &hsr_connect_refused, 1, 0 )) return FALSE;
 +
-+    WARN( "refusing the first eligible connect for the HSR compatibility profile\n" );
++    WARN( "refusing first HSR stream connection to %s\n", debugstr_sockaddr( addr ) );
 +    SetLastError( WSAECONNREFUSED );
 +    return TRUE;
 +}
