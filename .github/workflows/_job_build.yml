@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cleanup disk space
-        uses: endersonmenezes/free-disk-space@v3
+        uses: endersonmenezes/free-disk-space@v4
         with:
           remove_android: true
           remove_dotnet: true
