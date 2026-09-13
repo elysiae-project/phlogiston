@@ -6,6 +6,7 @@ on:
   push:
     tags:
       - 'Phlogiston-*-*'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -31,7 +32,7 @@ jobs:
       shell: bash
       run: |
         git fetch origin +refs/tags/*:refs/tags/*
-       - name: Create Release
+    - name: Create Release
       id: create
       shell: bash
       run: |
