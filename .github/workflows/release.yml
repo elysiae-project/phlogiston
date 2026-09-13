@@ -5,7 +5,7 @@ on:
     types: [ published ]
   push:
     tags:
-      - 'GE-Proton*-*'
+      - 'Phlogiston-*-*'
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -40,7 +40,7 @@ jobs:
         else
           gh release create "${{ github.ref_name }}" \
             --latest \
-            --title "${{ github.ref_name }} Released" \
+            --title "Phlogiston ${{ github.ref_name }}" \
             --notes-from-tag \
             --verify-tag \
             --repo "${{ github.server_url }}/${{ github.repository }}"
