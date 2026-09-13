@@ -47,7 +47,7 @@ apply_all_in_dir() {
     pushd protonfixes
     git reset --hard HEAD
     git clean -xdf
-    echo "PROTONFIXES: add optiscaler support"
+    echo "PROTONFIXES: apply local fixes"
     apply_all_in_dir "../patches/protonfixes/"
     popd
 
@@ -323,6 +323,9 @@ apply_all_in_dir() {
 
     echo "WINE: -HOTFIX- Validate Winsock connect address arguments"
     apply_patch "../patches/wine-hotfixes/pending/ws2_32-validate-connect-address.patch"
+
+    echo "WINE: -HOTFIX- Gate the HSR first-connect refusal workaround"
+    apply_patch "../patches/wine-hotfixes/pending/ws2_32-hsr-first-connect-refused.patch"
 
     echo "WINE: -HOTFIX- Fall back when GnuTLS lacks NO_SHUFFLE_EXTENSIONS"
     apply_patch "../patches/wine-hotfixes/pending/secur32-fallback-without-no-shuffle-extensions.patch"
