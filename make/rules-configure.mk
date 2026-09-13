@@ -11,7 +11,7 @@ ifneq ($(findstring $(3)-$(4),$(ARCHS)),)
 ifeq ($(wildcard $($(2)_ORIGIN)/configure),)
 $(2)_CONFIGURE_DEPS = $$($(2)_SRC)/configure
 
-$$($(2)_SRC)/configure: $$($(2)_ORIGIN)/configure.ac | $$(OBJ)/.$(1)-post-source
+$$($(2)_SRC)/configure: $$($(2)_ORIGIN)/configure.ac $$(OBJ)/.$(1)-post-source
 	@echo ":: autoreconfing $(1)..." >&2
 	cd "$$($(2)_SRC)" && autoreconf -fiv
 endif

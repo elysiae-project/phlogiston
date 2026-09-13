@@ -55,6 +55,8 @@ endif
 enable_ccache := 1
 ifneq ($(enable_ccache),0)
     CONFIGURE_CMD += --enable-ccache
+else
+    CONFIGURE_CMD += --disable-ccache
 endif
 
 TOPLEVELGOALS := all any clean configure deploy downloads help install module proton protonsdk redist
@@ -137,7 +139,7 @@ redist: | $(BUILD_ROOT)/$(DEPLOY_DIR)
 redist: configure
 	rm -rf $(BUILD_ROOT)/$(DEPLOY_DIR)/* && \
 	$(MAKE) $(MFLAGS) $(MAKEOVERRIDES) -C $(BUILD_DIR)/ $(UNSTRIPPED) redist && \
-	cp -Rf $(BUILD_DIR)/redist/* $(BUILD_ROOT)/$(DEPLOY_DIR) && \
+	tar -xzf $(BUILD_DIR)/$(_build_name).tar.gz -C $(BUILD_ROOT) && \
 	echo "Proton build available at $(BUILD_ROOT)/$(DEPLOY_DIR)"
 
 deploy: | $(BUILD_ROOT)/$(DEPLOY_DIR)-deploy
