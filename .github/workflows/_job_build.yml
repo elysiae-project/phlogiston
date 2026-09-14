@@ -18,12 +18,18 @@ jobs:
       matrix:
         include:
           - arch: aarch64
-            distro: ubuntu-24.04
-          - arch: x86_64
             distro: ubuntu-24.04-arm
+          - arch: x86_64
+            distro: ubuntu-24.04
     env:
       BUILD_NAME: phlogiston-${{ inputs.name }}-${{ matrix.arch }}
     steps:
+      - name: Check runner arch
+        run: |
+          uname -m
+          cat /etc/os-release
+          echo "Requested label matrix.distro=${{ matrix.distro }}"
+
       - name: Cleanup disk space
         uses: endersonmenezes/free-disk-space@v4
         with:
