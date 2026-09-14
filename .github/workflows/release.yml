@@ -56,4 +56,4 @@ jobs:
     uses: ./.github/workflows/_job_upload.yml
     with:
       version: ${{ github.ref_name }}
-      name: ${{ matrix.name }}
+      name: ${{ github.ref_name }}
