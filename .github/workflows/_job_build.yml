@@ -18,9 +18,9 @@ jobs:
       matrix:
         include:
           - arch: aarch64
-            distro: ubuntu-latest
+            distro: ubuntu-24.04
           - arch: x86_64
-            distro: ubuntu-latest
+            distro: ubuntu-24.04-arm
     env:
       BUILD_NAME: phlogiston-${{ inputs.name }}-${{ matrix.arch }}
     steps:
