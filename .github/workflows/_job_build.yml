@@ -12,8 +12,17 @@ permissions:
 
 jobs:
   proton:
-    name: Build ${{ inputs.name }}
+    name: Build ${{ inputs.name }} (${{ matrix.arch }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu-latest
+          - arch: x86_64
+            distro: ubuntu-latest
+    env:
+      BUILD_NAME: phlogiston-${{ inputs.name }}-${{ matrix.arch }}
     steps:
       - name: Cleanup disk space
         uses: endersonmenezes/free-disk-space@v4
@@ -37,14 +46,20 @@ jobs:
       - name: Prepare host
         run: sudo apt update && sudo apt-get install -y ccache fontforge-nox
 
+      - name: Set up ARM emulation
+        if: matrix.arch == 'aarch64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Restore cache
         id: ccache-restore
         uses: actions/cache/restore@v4
         with:
           path: ~/.ccache
-          key: ccache-proton-${{ github.run_id }}
+          key: ccache-proton-${{ matrix.arch }}-${{ github.run_id }}
           restore-keys: |
-            ccache-proton
+            ccache-proton-${{ matrix.arch }}-
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -65,9 +80,9 @@ jobs:
       - name: Configure
         working-directory: ./build
         run: |
-          ../configure.sh --build-name=${{ inputs.name }} --container-engine=docker
+          ../configure.sh --build-name="$BUILD_NAME" --target-arch=${{ matrix.arch == 'aarch64' && 'arm64' || matrix.arch }} --container-engine=docker
 
-      - name: Make ${{ inputs.name }}
+      - name: Make ${{ env.BUILD_NAME }}
         working-directory: ./build
         run: |
           make -j$(nproc) redist
@@ -80,15 +95,14 @@ jobs:
           path: ~/.ccache
           key: ${{ steps.ccache-restore.outputs.cache-primary-key }}
 
-      - name: Upload artifact ${{ inputs.name }}.tar.gz
+      - name: Upload artifact ${{ env.BUILD_NAME }}.tar.gz
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ inputs.name }}.tar.gz
-          path: ./build/${{ inputs.name }}.tar.gz
+          name: ${{ env.BUILD_NAME }}.tar.gz
+          path: ./build/${{ env.BUILD_NAME }}.tar.gz
 
-      - name: Upload artifact ${{ inputs.name }}.sha512sum
+      - name: Upload artifact ${{ env.BUILD_NAME }}.sha512sum
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ inputs.name }}.sha512sum
-          path: ./build/${{ inputs.name }}.sha512sum
-
+          name: ${{ env.BUILD_NAME }}.sha512sum
+          path: ./build/${{ env.BUILD_NAME }}.sha512sum

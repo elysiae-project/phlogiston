@@ -19,8 +19,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - file: ${{ inputs.name }}.tar.gz
-          - file: ${{ inputs.name }}.sha512sum
+          - file: phlogiston-${{ inputs.name }}-aarch64.tar.gz
+          - file: phlogiston-${{ inputs.name }}-aarch64.sha512sum
+          - file: phlogiston-${{ inputs.name }}-x86_64.tar.gz
+          - file: phlogiston-${{ inputs.name }}-x86_64.sha512sum
 
     runs-on: ubuntu-latest
 
