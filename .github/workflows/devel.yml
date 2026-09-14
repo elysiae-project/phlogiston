@@ -2,6 +2,9 @@ name: Development
 
 on: workflow_dispatch
 
+permissions:
+  contents: write
+
 concurrency:
   group: ${{ github.ref_name }}
   cancel-in-progress: true

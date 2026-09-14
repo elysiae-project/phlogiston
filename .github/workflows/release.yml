@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build
