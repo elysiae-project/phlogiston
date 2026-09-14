@@ -53,10 +53,6 @@ jobs:
   upload:
     name: Upload
     needs: release
-    strategy:
-      matrix:
-        include:
-          - name: ${{ github.ref_name }}
     uses: ./.github/workflows/_job_upload.yml
     with:
       version: ${{ github.ref_name }}
